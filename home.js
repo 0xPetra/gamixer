@@ -86,6 +86,24 @@ function home(app) {
       console.error(error);
     }
   })
+  
+  // Listen for a button invocation with action_id `button_abc` (assume it's inside of a modal)
+  app.action('button_abc', ({ ack, body, context }) => {
+    // Acknowledge the button request
+    ack();
+    try {
+      console.log('try worked', body);
+    }
+    catch (error) {
+      console.log('======>', error);
+    }
+  });
+
+
+
+
+
+
 }
 
 module.exports =  home;

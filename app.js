@@ -2,26 +2,43 @@
 const { App } = require("@slack/bolt");
 const home = require('./home.js');
 
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
 const app = new App({
-  token: 'xoxb-363206332737-848974909814-buayNalG7GDzHHRIXWZ9c6vU', //process.env.SLACK_BOT_TOKEN,
-  signingSecret: '8cce5bfb5bc8c4f9cfeea5fa02c33bea' //process.env.SLACK_SIGNING_SECRET
+  token: process.env.SLACK_BOT_TOKEN,
+  signingSecret: process.env.SLACK_SIGNING_SECRET
 });
 
   // All the room in the world for your code
   home(app);
 
+  app.command('/newgame', async ({ command, ack, say }) => {
+    // Acknowledge command request
+    // console.log('command', command)
+    ack();
+    say(`${command.text}`);
+  });
 
-// Listen for a button invocation with action_id `button_abc` (assume it's inside of a modal)
-app.action('button_abc', ({ ack, body, context }) => {
-  // Acknowledge the button request
-  ack();
+
+  // When a user joins the team, send a message in a predefined channel asking them to introduce themselves
+app.event('app_mention', async ({ event, context }) => {
+  console.log('gameMixer was mentioned', event, '##################', context)
   try {
-    console.log('try worked', body);
+    const result = await app.client.chat.postMessage({
+      token: context.botToken,
+      channel: event.channel,
+      text: `Hey there, you need help? Here are some commands to ger started :rocket: :`
+      // TODO: Add workspace
+    });
+    console.log(result);
   }
   catch (error) {
-    console.log('======>', error);
+    console.error(error);
   }
 });
+
 
 (async () => {
   await app.start(process.env.PORT || 3000)
